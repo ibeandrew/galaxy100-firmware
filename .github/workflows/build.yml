@@ -29,6 +29,9 @@ jobs:
           cd qmk
           git submodule update --init --recursive --depth=1
 
+      - name: Install QMK 0.25.10's specific Python deps (appdirs etc.)
+        run: pip install -r qmk/requirements.txt
+
       - name: Overlay Galaxy 100 keyboard files
         run: |
           mkdir -p qmk/keyboards/epomaker
