@@ -23,9 +23,9 @@ jobs:
       - name: Install QMK CLI
         run: pip install qmk
 
-      - name: Clone upstream QMK (has WB32FQ95 support)
+      - name: Clone upstream QMK pinned to 0.25.10 (post-WB32, pre-pinAPI-rename)
         run: |
-          git clone --depth=1 https://github.com/qmk/qmk_firmware.git qmk
+          git clone --depth=1 --branch=0.25.10 https://github.com/qmk/qmk_firmware.git qmk
           cd qmk
           git submodule update --init --recursive --depth=1
 
