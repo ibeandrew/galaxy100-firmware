@@ -23,9 +23,9 @@ jobs:
       - name: Install QMK CLI
         run: pip install qmk
 
-      - name: Clone upstream QMK
+      - name: Clone Epomaker QMK fork (has WB32FQ95 + EECONFIG_USER_DATABLOCK that galaxy100 needs)
         run: |
-          git clone --depth=1 https://github.com/qmk/qmk_firmware.git qmk
+          git clone --depth=1 https://github.com/Epomaker/qmk_firmware.git qmk
           cd qmk
           git submodule update --init --recursive --depth=1
 
