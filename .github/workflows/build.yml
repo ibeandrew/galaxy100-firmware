@@ -39,9 +39,17 @@ jobs:
           echo "--- overlaid layout ---"
           find qmk/keyboards/epomaker/galaxy100 -type f
 
+      - name: Configure QMK_HOME and verify keyboard discovered
+        working-directory: qmk
+        run: |
+          qmk config user.qmk_home=$(pwd)
+          echo "--- qmk list-keyboards (epomaker only) ---"
+          qmk list-keyboards 2>&1 | grep -E '^epomaker' || echo "(no epomaker keyboards found)"
+
       - name: Build firmware
         working-directory: qmk
         run: |
+          export QMK_HOME=$(pwd)
           make epomaker/galaxy100:default
 
       - name: Locate build outputs
