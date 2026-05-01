@@ -42,7 +42,7 @@ jobs:
       - name: Build firmware
         working-directory: qmk
         run: |
-          qmk compile -kb epomaker/galaxy100 -km default
+          make epomaker/galaxy100:default
 
       - name: Locate build outputs
         run: |
