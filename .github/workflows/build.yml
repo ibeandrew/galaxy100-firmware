@@ -1,0 +1,58 @@
+name: Build Galaxy 100 firmware
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (overlay)
+        uses: actions/checkout@v4
+        with:
+          path: overlay
+
+      - name: Install ARM toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-none-eabi build-essential dfu-util
+
+      - name: Install QMK CLI
+        run: pip install qmk
+
+      - name: Clone upstream QMK
+        run: |
+          git clone --depth=1 https://github.com/qmk/qmk_firmware.git qmk
+          cd qmk
+          git submodule update --init --recursive --depth=1
+
+      - name: Overlay Galaxy 100 keyboard files
+        run: |
+          mkdir -p qmk/keyboards/epomaker
+          cp -r overlay/keyboards/epomaker/galaxy100 qmk/keyboards/epomaker/
+          echo "--- overlaid layout ---"
+          find qmk/keyboards/epomaker/galaxy100 -type f
+
+      - name: Build firmware
+        working-directory: qmk
+        run: |
+          qmk compile -kb epomaker/galaxy100 -km default
+
+      - name: Locate build outputs
+        run: |
+          echo "--- bin/hex files in qmk/ ---"
+          find qmk -maxdepth 2 -name '*.bin' -o -name '*.hex' | head -50
+
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: galaxy100-firmware
+          path: |
+            qmk/*.bin
+            qmk/*.hex
+            qmk/.build/*.bin
+            qmk/.build/*.hex
+          if-no-files-found: error
