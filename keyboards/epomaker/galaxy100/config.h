@@ -52,19 +52,9 @@
 #define WS2812_SPI_DRIVER  SPIDM2
 #define WS2812_SPI_DIVISOR 32
 
-/* rgb_record */
+/* rgb_record (functions stubbed in rgb_record.c — feature unused) */
 #define RGBREC_CHANNEL_NUM 1
 #define ENABLE_RGB_MATRIX_RGBR_PLAY
 #define EECONFIG_CONFINFO_USE_SIZE (4 + 16)
 #define EECONFIG_RGBREC_USE_SIZE   (RGBREC_CHANNEL_NUM * MATRIX_ROWS * MATRIX_COLS * 2)
 #define EECONFIG_USER_DATA_SIZE    (EECONFIG_RGBREC_USE_SIZE + EECONFIG_CONFINFO_USE_SIZE)
-
-/* Define EECONFIG_USER_DATABLOCK for upstream QMK compatibility.
-   Epomaker's QMK fork defines this in quantum/eeconfig.h; upstream does not.
-   Replicating Epomaker's definition so we can build against vanilla QMK. */
-#ifndef EECONFIG_USER_DATABLOCK
-#define EECONFIG_USER_DATABLOCK ((uint8_t *)((EECONFIG_BASE_SIZE) + (EECONFIG_KB_DATA_SIZE)))
-#endif
-
-#define RGBREC_EECONFIG_ADDR       (uint8_t *)(EECONFIG_USER_DATABLOCK)
-#define CONFINFO_EECONFIG_ADDR     (uint32_t *)((uint32_t)RGBREC_EECONFIG_ADDR + (uint32_t)EECONFIG_RGBREC_USE_SIZE)
