@@ -55,6 +55,9 @@
 /* rgb_record (functions stubbed in rgb_record.c — feature unused) */
 #define RGBREC_CHANNEL_NUM 1
 #define ENABLE_RGB_MATRIX_RGBR_PLAY
+
+/* Custom effects from this fork */
+#define ENABLE_RGB_MATRIX_KEEB_TEST_CHECKERBOARD
 #define EECONFIG_CONFINFO_USE_SIZE (4 + 16)
 #define EECONFIG_RGBREC_USE_SIZE   (RGBREC_CHANNEL_NUM * MATRIX_ROWS * MATRIX_COLS * 2)
 #define EECONFIG_USER_DATA_SIZE    (EECONFIG_RGBREC_USE_SIZE + EECONFIG_CONFINFO_USE_SIZE)
