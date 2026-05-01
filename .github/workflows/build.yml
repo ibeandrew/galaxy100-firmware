@@ -23,14 +23,11 @@ jobs:
       - name: Install QMK CLI
         run: pip install qmk
 
-      - name: Clone Epomaker QMK fork (has WB32FQ95 + EECONFIG_USER_DATABLOCK that galaxy100 needs)
+      - name: Clone upstream QMK (has WB32FQ95 support)
         run: |
-          git clone --depth=1 https://github.com/Epomaker/qmk_firmware.git qmk
+          git clone --depth=1 https://github.com/qmk/qmk_firmware.git qmk
           cd qmk
           git submodule update --init --recursive --depth=1
-
-      - name: Install Epomaker QMK fork's Python deps
-        run: pip install -r qmk/requirements.txt
 
       - name: Overlay Galaxy 100 keyboard files
         run: |
@@ -39,18 +36,10 @@ jobs:
           echo "--- overlaid layout ---"
           find qmk/keyboards/epomaker/galaxy100 -type f
 
-      - name: Configure QMK_HOME and verify keyboard discovered
-        working-directory: qmk
-        run: |
-          qmk config user.qmk_home=$(pwd)
-          echo "--- qmk list-keyboards (epomaker only) ---"
-          qmk list-keyboards 2>&1 | grep -E '^epomaker' || echo "(no epomaker keyboards found)"
-
       - name: Build firmware
         working-directory: qmk
         run: |
-          export QMK_HOME=$(pwd)
-          make epomaker/galaxy100:default
+          qmk compile -kb epomaker/galaxy100 -km default
 
       - name: Locate build outputs
         run: |
