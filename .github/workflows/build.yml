@@ -50,7 +50,7 @@ jobs:
           mkdir -p ../offset-variants
           LDFILE="keyboards/epomaker/galaxy100/ld/WB32FQ95xB.ld"
           TRIM="../overlay/trim_bin.py"
-          for OFFSET_HEX in 2000 4000 6000 8000 C000; do
+          for OFFSET_HEX in 0000 2000 4000 6000 8000 C000; do
             # Bin file starts at memory address 0, so to extract code linked
             # at 0x0800XXXX we skip the full 0x0800XXXX bytes from file start.
             OFFSET_DEC=$((16#0800${OFFSET_HEX}))
