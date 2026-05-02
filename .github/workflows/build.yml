@@ -48,47 +48,28 @@ jobs:
         working-directory: qmk
         run: |
           mkdir -p ../offset-variants
-          for offset in 0x2000 0x4000 0x6000 0x8000 0xC000; do
-            echo "=== building variant for app start 0x0800$(printf '%X' $((offset)) | tail -c 4) ==="
-            # Patch the linker script's flash0 org to this offset
-            sed -i "s|flash0 (rx) : org = 0x080[0-9A-Fa-f]*, len = 128k - 0x[0-9A-Fa-f]*|flash0 (rx) : org = 0x0800${offset:2}000, len = 128k - 0x${offset:2}000|" \
-              keyboards/epomaker/galaxy100/ld/WB32FQ95xB.ld || true
-            # Actually, use python for clean substitution
-            python3 -c "
-import re, sys
-ldfile = 'keyboards/epomaker/galaxy100/ld/WB32FQ95xB.ld'
-text = open(ldfile).read()
-new_text = re.sub(r'flash0 \(rx\) : org = 0x080[0-9A-Fa-f]+, len = 128k - 0x[0-9A-Fa-f]+',
-                  f'flash0 (rx) : org = 0x0800${offset:2}000, len = 128k - 0x${offset:2}000', text)
-open(ldfile, 'w').write(new_text)
-print(open(ldfile).read().split('\n')[9])  # show flash0 line
-" || python3 << EOF
-import re
-ldfile = 'keyboards/epomaker/galaxy100/ld/WB32FQ95xB.ld'
-text = open(ldfile).read()
-hex_off = '${offset}'
-# strip leading 0x
-hex_clean = hex_off[2:].zfill(4)
-new_text = re.sub(r'flash0 \(rx\) : org = 0x080[0-9A-Fa-f]+, len = 128k - 0x[0-9A-Fa-f]+',
-                  f'flash0 (rx) : org = 0x0800{hex_clean}, len = 128k - 0x{hex_clean}', text)
-open(ldfile, 'w').write(new_text)
-EOF
-            cat keyboards/epomaker/galaxy100/ld/WB32FQ95xB.ld | grep "flash0 (rx)"
+          LDFILE="keyboards/epomaker/galaxy100/ld/WB32FQ95xB.ld"
+          for OFFSET_HEX in 2000 4000 6000 8000 C000; do
+            OFFSET_DEC=$((16#${OFFSET_HEX}))
+            echo ""
+            echo "============================================="
+            echo "=== variant: app start 0x0800${OFFSET_HEX} ==="
+            echo "============================================="
+            # Replace flash0 line in linker script
+            sed -i "s|flash0 (rx) : org = 0x080[0-9A-Fa-f]*, len = 128k - 0x[0-9A-Fa-f]*|flash0 (rx) : org = 0x0800${OFFSET_HEX}, len = 128k - 0x${OFFSET_HEX}|" "$LDFILE"
+            grep "flash0 (rx)" "$LDFILE"
             rm -rf .build
-            qmk compile -kb epomaker/galaxy100 -km default 2>&1 | tail -5
-            cp .build/epomaker_galaxy100_default.bin "../offset-variants/raw-${offset}.bin"
+            qmk compile -kb epomaker/galaxy100 -km default 2>&1 | tail -3
+            RAW=".build/epomaker_galaxy100_default.bin"
+            OUT="../offset-variants/firmware-relinked-0x0800${OFFSET_HEX}.bin"
             python3 -c "
-import sys
-data = open('../offset-variants/raw-${offset}.bin', 'rb').read()
-skip = int('${offset}', 16)
-trimmed = data[skip:]
-open('../offset-variants/firmware-relinked-${offset}.bin', 'wb').write(trimmed)
-print(f'  raw {len(data)} bytes -> trimmed to {len(trimmed)} bytes')
 import struct
+data = open('$RAW', 'rb').read()
+trimmed = data[$OFFSET_DEC:]
+open('$OUT', 'wb').write(trimmed)
 sp, reset = struct.unpack('<II', trimmed[:8])
-print(f'  SP=0x{sp:08X} reset=0x{reset:08X}')
+print(f'  raw={len(data)} trimmed={len(trimmed)} SP=0x{sp:08X} reset=0x{reset:08X}')
 "
-            rm "../offset-variants/raw-${offset}.bin"
           done
           echo ""
           echo "=== final variants ==="
