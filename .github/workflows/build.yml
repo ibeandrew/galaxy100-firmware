@@ -56,23 +56,26 @@ jobs:
 
       - name: Bundle wb32-dfu-updater_cli + DLLs from MSYS2
         run: |
-          sudo apt-get install -y zstd
           mkdir -p flash-tool/bin
           cd flash-tool
           BASE="https://repo.msys2.org/mingw/mingw64"
-          # Discover latest available filenames (no Cloudflare from GitHub runners)
           INDEX=$(curl -fsSL "$BASE/")
           pick() {
             echo "$INDEX" | grep -oE "$1" | sort -V | tail -1
           }
-          WB32=$(pick 'mingw-w64-x86_64-wb32-dfu-updater-[0-9.-]+-any\.pkg\.tar\.zst')
-          LIBUSB=$(pick 'mingw-w64-x86_64-libusb-[0-9.-]+-any\.pkg\.tar\.zst')
-          GCC_LIBS=$(pick 'mingw-w64-x86_64-gcc-libs-[0-9.-]+-any\.pkg\.tar\.zst')
-          LIBWINPTHREAD=$(pick 'mingw-w64-x86_64-libwinpthread-git-[0-9a-f.-]+-any\.pkg\.tar\.zst')
+          # Permissive regex - match any chars after package name (libwinpthread-git uses commit hashes)
+          WB32=$(pick 'mingw-w64-x86_64-wb32-dfu-updater-[^"<>]+-any\.pkg\.tar\.zst')
+          LIBUSB=$(pick 'mingw-w64-x86_64-libusb-[0-9][^"<>]*-any\.pkg\.tar\.zst')
+          GCC_LIBS=$(pick 'mingw-w64-x86_64-gcc-libs-[^"<>]+-any\.pkg\.tar\.zst')
+          LIBWINPTHREAD=$(pick 'mingw-w64-x86_64-libwinpthread-git-[^"<>]+-any\.pkg\.tar\.zst')
           echo "wb32:    $WB32"
           echo "libusb:  $LIBUSB"
           echo "gcc:     $GCC_LIBS"
           echo "wpthrd:  $LIBWINPTHREAD"
+          if [ -z "$LIBWINPTHREAD" ]; then
+            echo "ERROR: libwinpthread-git package not found in MSYS2 index"
+            exit 1
+          fi
           for pkg in "$WB32" "$LIBUSB" "$GCC_LIBS" "$LIBWINPTHREAD"; do
             [ -z "$pkg" ] && continue
             curl -fsSL "$BASE/$pkg" -o "$pkg"
@@ -80,13 +83,17 @@ jobs:
             tar -xf "${pkg%.zst}"
             rm "$pkg" "${pkg%.zst}"
           done
-          # Pick out exe + DLL deps
+          echo "--- all DLLs available in mingw64/bin ---"
+          ls mingw64/bin/*.dll 2>/dev/null || true
+          # Copy the .exe and the specific DLLs we need at runtime
           cp mingw64/bin/wb32-dfu-updater_cli.exe bin/
-          cp mingw64/bin/libusb-1.0.dll bin/
-          cp mingw64/bin/libwinpthread-1.dll bin/
-          cp mingw64/bin/libgcc_s_seh-1.dll bin/ 2>/dev/null || true
-          cp mingw64/bin/libstdc++-6.dll bin/ 2>/dev/null || true
-          # Cleanup
+          for dll in libusb-1.0.dll libwinpthread-1.dll libgcc_s_seh-1.dll libstdc++-6.dll; do
+            if [ -f "mingw64/bin/$dll" ]; then
+              cp "mingw64/bin/$dll" bin/
+            else
+              echo "WARN: $dll not found"
+            fi
+          done
           rm -rf mingw64 var .BUILDINFO .MTREE .PKGINFO 2>/dev/null || true
           echo "--- bundled tool ---"
           ls -la bin/
