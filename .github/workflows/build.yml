@@ -15,10 +15,15 @@ jobs:
         with:
           path: overlay
 
-      - name: Install ARM toolchain
+      - name: Install ARM toolchain (no apt mirrors)
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
+        with:
+          release: '13.2.Rel1'
+
+      - name: Install build-essential + zstd (with retries for flaky mirrors)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-arm-none-eabi build-essential dfu-util
+          sudo apt-get -o Acquire::Retries=8 -o Acquire::http::Timeout=20 update -y
+          sudo apt-get -o Acquire::Retries=8 -o Acquire::http::Timeout=20 install -y build-essential zstd
 
       - name: Install QMK CLI
         run: pip install qmk
