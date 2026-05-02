@@ -1,13 +1,13 @@
 /*
  * Custom linker script for Galaxy 100 with RDMCTMZT bootloader.
- * Shifts app flash origin to 0x08008000 (32KB after start), reserving room
- * for the OEM bootloader. Total flash on WB32FQ95xB is 128KB.
+ * Iterating to find the correct app start address for the OEM bootloader.
+ * Total flash on WB32FQ95xB is 128KB. Currently trying: 0x08004000 (16KB bootloader).
  * Based on the ChibiOS-Contrib WB32FQ95xB.ld template.
  */
 
 MEMORY
 {
-    flash0 (rx) : org = 0x08008000, len = 128k - 0x8000
+    flash0 (rx) : org = 0x08004000, len = 128k - 0x4000
     flash1 (rx) : org = 0x00000000, len = 0
     flash2 (rx) : org = 0x00000000, len = 0
     flash3 (rx) : org = 0x00000000, len = 0
