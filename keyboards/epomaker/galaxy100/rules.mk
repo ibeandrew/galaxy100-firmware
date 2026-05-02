@@ -1,4 +1,5 @@
-# Use our custom linker script (in ./ld/) with app at 0x08008000 to skip
-# the RDMCTMZT bootloader region. Filename matches the standard chip variant
-# so QMK's MCU detection (hal_lld.h, etc.) keeps working.
-MCU_LDSCRIPT = WB32FQ95xC
+# Force the app's .text/.startup section to start past the RDMCTMZT bootloader
+# (assumed at 0x08000000 for 32KB). This overrides where the linker places
+# our vector table without needing a full custom linker script (which breaks
+# QMK's MCU detection logic).
+EXTRALDFLAGS += -Wl,--section-start=.startup=0x08008000
