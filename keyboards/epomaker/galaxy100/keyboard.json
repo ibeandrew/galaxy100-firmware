@@ -3,6 +3,8 @@
     "keyboard_name": "Galaxy100 QMK",
     "maintainer": "Epomaker",
     "bootloader": "wb32-dfu",
+    "bootloader_instructions": "Hold Esc + plug in USB-C; flash via QMK Toolbox to D:\\FLASH.BIN",
+    "bootloader_size": "0x8000",
     "bootmagic": {
         "matrix": [0, 0]
     },
