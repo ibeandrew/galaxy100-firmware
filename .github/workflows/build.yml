@@ -49,10 +49,19 @@ jobs:
         run: |
           qmk compile -kb epomaker/galaxy100 -km default
 
-      - name: Locate build outputs
+      - name: Locate build outputs + dump linker scripts for offset analysis
         run: |
           echo "--- bin/hex files in qmk/ ---"
           find qmk -maxdepth 2 -name '*.bin' -o -name '*.hex' | head -50
+          echo ""
+          echo "--- ARM linker scripts referenced (looking for FLASH origin) ---"
+          find qmk -name '*.ld' 2>/dev/null | xargs -I{} sh -c 'echo "=== {} ==="; grep -A2 "MEMORY\|FLASH.*ORIGIN\|ORIGIN.*0x08" {} 2>/dev/null | head -30; echo ""' | head -200
+          echo ""
+          echo "--- BOOTLOADER_SIZE references in build ---"
+          find qmk/keyboards/epomaker/galaxy100 qmk/builddefs qmk/platforms/chibios/bootloaders -type f \( -name '*.mk' -o -name '*.ld' \) 2>/dev/null | xargs grep -l 'BOOTLOADER_SIZE\|bootloader_size\|0x8000\|FLASH.*0x08' 2>/dev/null | head -20
+          echo ""
+          echo "--- linker map memory regions ---"
+          find qmk/.build -name '*.map' 2>/dev/null | head -1 | xargs -I{} sh -c 'echo "=== {} ==="; grep -A3 "Memory Configuration\|^flash\|^ram" {} 2>/dev/null | head -20'
 
       - name: Bundle wb32-dfu-updater_cli + DLLs from MSYS2
         run: |
