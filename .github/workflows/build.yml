@@ -49,27 +49,18 @@ jobs:
         run: |
           mkdir -p ../offset-variants
           LDFILE="keyboards/epomaker/galaxy100/ld/WB32FQ95xB.ld"
+          TRIM="../overlay/trim_bin.py"
           for OFFSET_HEX in 2000 4000 6000 8000 C000; do
             OFFSET_DEC=$((16#${OFFSET_HEX}))
             echo ""
             echo "============================================="
             echo "=== variant: app start 0x0800${OFFSET_HEX} ==="
             echo "============================================="
-            # Replace flash0 line in linker script
             sed -i "s|flash0 (rx) : org = 0x080[0-9A-Fa-f]*, len = 128k - 0x[0-9A-Fa-f]*|flash0 (rx) : org = 0x0800${OFFSET_HEX}, len = 128k - 0x${OFFSET_HEX}|" "$LDFILE"
             grep "flash0 (rx)" "$LDFILE"
             rm -rf .build
             qmk compile -kb epomaker/galaxy100 -km default 2>&1 | tail -3
-            RAW=".build/epomaker_galaxy100_default.bin"
-            OUT="../offset-variants/firmware-relinked-0x0800${OFFSET_HEX}.bin"
-            python3 -c "
-import struct
-data = open('$RAW', 'rb').read()
-trimmed = data[$OFFSET_DEC:]
-open('$OUT', 'wb').write(trimmed)
-sp, reset = struct.unpack('<II', trimmed[:8])
-print(f'  raw={len(data)} trimmed={len(trimmed)} SP=0x{sp:08X} reset=0x{reset:08X}')
-"
+            python3 "$TRIM" .build/epomaker_galaxy100_default.bin "../offset-variants/firmware-relinked-0x0800${OFFSET_HEX}.bin" "$OFFSET_DEC"
           done
           echo ""
           echo "=== final variants ==="
