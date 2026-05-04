@@ -55,4 +55,14 @@ REGION_ALIAS("DATA_RAM_LMA", flash0);
 REGION_ALIAS("BSS_RAM",  ram0);
 REGION_ALIAS("HEAP_RAM", ram0);
 
+/* Newer chibios rules expect this region too */
+REGION_ALIAS("RAM_INIT_FLASH_LMA", flash0);
+
+/* Discard ARM exception index tables - we don't use C++ exceptions, and at
+   flash base 0x00000000 the linker tries to place them overlapping .vectors. */
+SECTIONS
+{
+    /DISCARD/ : { *(.ARM.exidx*) *(.ARM.extab*) *(.gnu.linkonce.armexidx.*) }
+}
+
 INCLUDE rules.ld
