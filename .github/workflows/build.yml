@@ -64,6 +64,7 @@ jobs:
             qmk compile -kb epomaker/galaxy100 -km default 2>&1 | tail -3
             python3 "$TRIM" .build/epomaker_galaxy100_default.bin "../offset-variants/firmware-relinked-0x0800${OFFSET_HEX}.bin" "$OFFSET_DEC"
           done
+          fi
           echo ""
           echo "=== final variants ==="
           ls -la ../offset-variants/
