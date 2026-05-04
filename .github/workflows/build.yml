@@ -54,12 +54,7 @@ jobs:
           rm -rf .build
           qmk compile -kb epomaker/galaxy100 -km default 2>&1 | tail -5
           cp .build/epomaker_galaxy100_default.bin ../offset-variants/firmware-base-0x00000000.bin
-          python3 -c "
-import struct
-data = open('../offset-variants/firmware-base-0x00000000.bin', 'rb').read()
-sp, reset = struct.unpack('<II', data[:8])
-print(f'  size={len(data)}  SP=0x{sp:08X}  reset=0x{reset:08X}')
-"
+          python3 -c 'import struct; d=open("../offset-variants/firmware-base-0x00000000.bin","rb").read(); sp,reset=struct.unpack("<II",d[:8]); print(f"size={len(d)} SP=0x{sp:08X} reset=0x{reset:08X}")'
           echo ""
           echo "=== final variant ==="
           ls -la ../offset-variants/
