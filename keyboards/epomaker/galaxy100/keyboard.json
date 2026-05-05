@@ -60,6 +60,10 @@
         "cols": ["C0", "C1", "C2", "C3", "A6", "B10", "B11", "B12", "B13", "B14", "A10", "C6", "C7", "C8", "C9", "A8", "C4", "C5", "B0"],
         "rows": ["A0", "A1", "A2", "A3", "A4", "C13"]
     },
+    "matrix_size": {
+        "rows": 6,
+        "cols": 19
+    },
     "processor": "WB32FQ95",
     "rgb_matrix": {
         "animations": {
