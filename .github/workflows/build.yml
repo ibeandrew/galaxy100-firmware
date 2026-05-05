@@ -43,10 +43,10 @@ jobs:
           cp -r overlay/keyboards/epomaker/galaxy100 qmk/keyboards/epomaker/
           # Their fork uses info.json (older QMK name), not keyboard.json (newer)
           cp qmk/keyboards/epomaker/galaxy100/keyboard.json qmk/keyboards/epomaker/galaxy100/info.json
-          # Restore the original (non-stubbed) rgb_record.c since Epomaker's fork has the macros it needs
-          curl -fsSL https://raw.githubusercontent.com/Epomaker/galaxy100/main/rgb_record.c -o qmk/keyboards/epomaker/galaxy100/rgb_record/rgb_record.c
-          echo "--- restored rgb_record.c (first lines) ---"
-          head -10 qmk/keyboards/epomaker/galaxy100/rgb_record/rgb_record.c
+          # Keep the stubbed rgb_record.c (our overlay has it). Compile path differs
+          # between gmake bypass and qmk compile, and the stub avoids include-path issues.
+          echo "--- using stubbed rgb_record.c (first lines) ---"
+          head -8 qmk/keyboards/epomaker/galaxy100/rgb_record/rgb_record.c
           echo "--- linker script flash0 line ---"
           grep "flash0 (rx)" qmk/keyboards/epomaker/galaxy100/ld/WB32FQ95xB.ld
 
